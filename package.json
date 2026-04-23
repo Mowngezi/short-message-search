@@ -1,15 +1,21 @@
 {
   "name": "short-message-search",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Source SMS — an offline intelligence proxy over SMS. Claude Opus 4.7 compresses answers into 160 characters for feature-phone users in township economies.",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "sandbox": "node sandbox.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["sms", "twilio", "anthropic", "claude", "opus-4.7", "informal-economy", "south-africa"],
+  "author": "Mongezi Xhoma",
+  "license": "MIT",
   "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
     "@supabase/supabase-js": "^2.104.0",
