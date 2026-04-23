@@ -245,6 +245,76 @@ function purgeExpiredInventory() {
 }
 
 // ──────────────────────────────────────────────
+// INVENTORY LEDGER — Supabase persistence
+// Railway's filesystem is ephemeral. The audit log IS the
+// inventory: every supply message is written to the ledger,
+// and on boot we rehydrate `inventory.json` from the last
+// DECAY_WINDOW_HOURS of ledger rows. Restart is harmless.
+// ──────────────────────────────────────────────
+
+// Write a supply entry to Supabase (fire-and-forget, non-blocking)
+async function logSupplyToLedger(entry) {
+    try {
+        const { error } = await supabase
+            .from('inventory_ledger')
+            .insert([{
+                vendor_phone: entry.vendorPhone,
+                raw_update: entry.raw_update,
+                geo_tag: entry.geo_tag,
+                created_at: entry.timestamp, // preserve the client-side timestamp
+            }]);
+        if (error) {
+            console.error('[❌ Ledger Error]', error.message);
+            return false;
+        }
+        console.log('[📒 LEDGER] Supply row persisted');
+        return true;
+    } catch (err) {
+        console.error('[❌ Ledger Exception]', err.message);
+        return false;
+    }
+}
+
+// Rehydrate inventory.json from Supabase on boot.
+// Runs BEFORE the server starts accepting traffic so the first
+// demand query sees the full market, not an empty inventory.
+async function rebuildInventoryFromLedger() {
+    try {
+        const cutoff = new Date(Date.now() - DECAY_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+        const { data, error } = await supabase
+            .from('inventory_ledger')
+            .select('vendor_phone, raw_update, geo_tag, created_at')
+            .gte('created_at', cutoff)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('[❌ Rebuild Error]', error.message, '— starting with existing cache');
+            return -1;
+        }
+
+        if (!data || data.length === 0) {
+            console.log('[📦 REBUILD] Ledger empty for last 24h — starting with existing cache');
+            return 0;
+        }
+
+        // Map ledger rows back to the in-memory shape the rest of the server expects.
+        const rebuilt = data.map(row => ({
+            vendorPhone: row.vendor_phone,
+            raw_update: row.raw_update,
+            timestamp: row.created_at,
+            geo_tag: row.geo_tag || 'unknown',
+        }));
+
+        writeInventory({ inventory: rebuilt });
+        console.log(`[📦 REBUILD] Hydrated ${rebuilt.length} supply entries from ledger (last ${DECAY_WINDOW_HOURS}h)`);
+        return rebuilt.length;
+    } catch (err) {
+        console.error('[❌ Rebuild Exception]', err.message, '— starting with existing cache');
+        return -1;
+    }
+}
+
+// ──────────────────────────────────────────────
 // THE COMPRESSION ENGINE — with Extended Thinking
 // Uses Opus 4.7's internal reasoning to think
 // deeply before compressing to 140 chars.
@@ -349,6 +419,11 @@ app.post('/sms', async (req, res) => {
         db.inventory.push(newEntry);
         writeInventory(db);
         purgeExpiredInventory(); // Clean up stale entries on every write
+        // Persist to Supabase ledger so the entry survives a container restart.
+        // Fire-and-forget: we do NOT block the SMS response on the ledger write —
+        // the local cache is authoritative for the current session, the ledger
+        // is insurance for the next boot.
+        logSupplyToLedger(newEntry).catch(err => console.error('[❌ Ledger Write]', err.message));
         console.log(`[💾 SUPPLY LOGGED] ${incomingMessage}`);
         // If vendor hasn't set their area, nudge them
         responseText = geoTag
@@ -441,17 +516,31 @@ process.on('unhandledRejection', (err) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    // Purge stale inventory on boot
+
+// ──────────────────────────────────────────────
+// BOOT SEQUENCE
+// 1. Rehydrate inventory from the Supabase ledger (survives Railway restarts)
+// 2. Purge anything past the decay window (safety net)
+// 3. Start accepting traffic
+// ──────────────────────────────────────────────
+async function boot() {
+    await rebuildInventoryFromLedger();
     purgeExpiredInventory();
     const live = getLiveInventory();
 
-    console.log(`\n🔥 Source-SMS Gateway running on port ${PORT}`);
-    console.log(`📡 Webhook: POST /sms`);
-    console.log(`📖 Help: Text "help" / "?" / "menu"`);
-    console.log(`🏠 Home Node: Text "home [area]" to set location`);
-    console.log(`📦 Supply: Text "selling/got [item R00]" (11 languages)`);
-    console.log(`🔍 Demand: Text any query for compressed answers`);
-    console.log(`🗑️  Decay: ${DECAY_WINDOW_HOURS}h window | ${live.length} live items`);
-    console.log(`💚 Health: GET /\n`);
+    app.listen(PORT, () => {
+        console.log(`\n🔥 Source-SMS Gateway running on port ${PORT}`);
+        console.log(`📡 Webhook: POST /sms`);
+        console.log(`📖 Help: Text "help" / "?" / "menu"`);
+        console.log(`🏠 Home Node: Text "home [area]" to set location`);
+        console.log(`📦 Supply: Text "selling/got [item R00]" (11 languages)`);
+        console.log(`🔍 Demand: Text any query for compressed answers`);
+        console.log(`🗑️  Decay: ${DECAY_WINDOW_HOURS}h window | ${live.length} live items`);
+        console.log(`💚 Health: GET /\n`);
+    });
+}
+
+boot().catch(err => {
+    console.error('[💀 BOOT FAILED]', err);
+    process.exit(1);
 });

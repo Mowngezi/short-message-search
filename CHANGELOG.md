@@ -208,4 +208,80 @@ Stock in the township moves fast. The database now reflects that.
 
 ---
 
+### 21:20 — Repo initialized + deploy prep ✅
+
+**Git** — repo initialized on `main`, two commits:
+- `ead49a8` Initial commit — Source SMS build through Day 3
+- `5ef50a1` Add deploy scripts, .env.example, project metadata
+
+Public at `https://github.com/Mowngezi/short-message-search`. Open-source for judges.
+
+**Deploy-readiness fixes** applied to `package.json`:
+- Added `"start": "node server.js"` — Railway/Render can now auto-detect boot command (this was a hard deploy blocker)
+- Added `"dev": "node --watch server.js"` for local iteration
+- Added `"sandbox": "node sandbox.js"` for the REPL
+- Proper description, author, MIT license, `engines.node: ">=20"`
+- Keywords for repo discoverability: sms, twilio, anthropic, claude, opus-4.7, informal-economy
+
+**`.env.example`** — all 7 env vars documented so judges cloning the repo can configure locally without guessing.
+
+**`DEPLOY.md`** — 6-step runbook for shipping to Railway (project → env vars → public URL → Twilio webhook → live SMS test → warm-up cron). End-to-end in ~15 minutes. Includes rollback instructions and a post-deploy checklist.
+
+**Fresh engineering audit** — original ASSESSMENT scored Depth & Execution 4/10 based on a pre-fix snapshot. Post-CHANGELOG re-audit: **6.5/10**.
+- Engineering sound: 6/10 — no syntax errors, end-to-end routing works, decay logic correct
+- Thoughtfully refined: 7/10 — 140-trick is elegant, extended thinking correctly wired, 11-language supply detection
+- Real craft: 6/10 — compression engine is real, supply/demand split is well-thought, rough edges on validation + RLS
+
+Holding the score back: wide-open Supabase RLS (`FOR ALL USING (true)`), no input validation on `extractLocation()`/`raw_update`, `gateway.js` CLI doesn't use extended thinking (mixed messaging), no Twilio 401/rate-limit handling. None blocking — all stress-test risk for judging.
+
+---
+
+### 21:22 — Stress-test harness ✅
+
+**`scripts/stress-test.js`** — fires 30+ realistic SMS queries at the live `/sms` webhook in bounded-concurrency batches. Measures:
+- Latency p50/p95/max
+- SMS compliance: flags anything over 160 chars (the hard submission requirement)
+- Per-route pass/fail breakdown (help/home/supply/demand)
+- Full per-query CSV audit trail (`scripts/results-<stamp>.csv`)
+
+**Query suite covers:**
+- All 4 routes (help, home, supply, demand)
+- 11 SA languages on the supply path
+- isiZulu + isiXhosa + Setho-mix on the demand path
+- Edge cases: price in a demand query (must NOT misroute as supply), "selling" without a price (must NOT trip supply), long 200-char queries, mixed-language
+- Stable fake phone numbers so Supabase `user_profiles` stays tidy
+
+**Usage:**
+```bash
+BASE_URL=https://<deployed-url>/ node scripts/stress-test.js
+```
+
+**Why this matters for judging:** a CSV with latency histogram + 100% 160-char compliance across 11 languages is a real "we tested this at scale" signal. Burns Anthropic Console credits, not chat quota.
+
+---
+
+### 21:45 — Inventory persistence via Supabase ledger ✅
+
+**Problem:** Railway's filesystem is ephemeral. Every container restart wipes `inventory.json`, so vendor supply vanishes between boots. Mid-demo risk.
+
+**Conceptual reframe (Mow's):** the audit log *is* the inventory. Every supply message is a market event. The market has always remembered who said what and when — `inventory.json` was just a cache we forgot to treat like one.
+
+**Shipped:**
+- New `inventory_ledger` table in `setup.sql` with `(vendor_phone, raw_update, geo_tag, created_at)` + a descending index on `created_at` for the hot boot query.
+- `logSupplyToLedger()` in `server.js` — every Route 2 (supply) write now fire-and-forgets a row into Supabase. Non-blocking: the SMS reply doesn't wait on the ledger write.
+- `rebuildInventoryFromLedger()` — boot-time query for the last 24h (same window as `DECAY_WINDOW_HOURS`) that rehydrates `inventory.json` before the server accepts traffic.
+- Boot sequence refactored into `async function boot()` so rebuild completes before `app.listen()` fires. Restart is now harmless.
+
+**What we explicitly did NOT do:** wrap the boot rebuild in a Claude routine. Routines are for scheduled or event-triggered Claude work — PR reviews, nightly decay sweeps, reputation scans. A boot-time DB read is not that shape of problem. Adding the routine machinery here would be ceremony, not substance. Noted future use in the roadmap: nightly decay sweep + weekly vendor-reliability scan.
+
+**Opus 4.7 scorecard after this change — what's earning the model's keep:**
+1. Adaptive extended thinking on demand queries (genuine reasoning, not a latency flex)
+2. Native multilingual inference across 11 SA languages with zero translation layer
+3. 140-char self-constraint compression (prompt-level discipline, prevents 160 overflow)
+4. The user manual itself fits SMS — the product eats its own dog food
+
+**Still deferred by design:** 1M context window (unused — SMS doesn't need it; restraint is the flex), routines (correct shape of problem hasn't appeared in the core loop).
+
+---
+
 *Entries will be added as changes are made. Each entry includes what changed, why, and what it unlocks.*

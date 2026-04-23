@@ -28,3 +28,7 @@ build/
 # Runtime
 *.pid
 *.seed
+
+# Stress-test output — commit a specific run if you want it as submission evidence,
+# but don't blanket-commit every iteration.
+scripts/results-*.csv
