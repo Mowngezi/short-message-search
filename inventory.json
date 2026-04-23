@@ -1,0 +1,34 @@
+{
+  "inventory": [
+    {
+      "vendorPhone": "0831112222",
+      "raw_update": "Got 50 bags Afrisam cement, R95 each today",
+      "timestamp": "2026-04-23T08:15:00.000Z",
+      "geo_tag": "Alexandra_3rdAve"
+    },
+    {
+      "vendorPhone": "0829998877",
+      "raw_update": "Selling chicken quarter R35, full R120. Peri peri or plain",
+      "timestamp": "2026-04-23T07:30:00.000Z",
+      "geo_tag": "Alexandra_FarRd"
+    },
+    {
+      "vendorPhone": "0845556677",
+      "raw_update": "Got maize meal 10kg White Star R89, Iwisa R85",
+      "timestamp": "2026-04-23T09:00:00.000Z",
+      "geo_tag": "Alexandra_LondonRd"
+    },
+    {
+      "vendorPhone": "0831234567",
+      "raw_update": "Selling airtime Vodacom R5 R10 R29. MTN R12 R29. Data 1GB R99",
+      "timestamp": "2026-04-23T06:45:00.000Z",
+      "geo_tag": "Alexandra_2ndAve"
+    },
+    {
+      "vendorPhone": "0827778899",
+      "raw_update": "Got paraffin 5L R45, 20L R160. Candles 6pack R18",
+      "timestamp": "2026-04-23T08:00:00.000Z",
+      "geo_tag": "Alexandra_8thAve"
+    }
+  ]
+}
