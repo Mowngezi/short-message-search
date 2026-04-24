@@ -284,4 +284,30 @@ BASE_URL=https://<deployed-url>/ node scripts/stress-test.js
 
 ---
 
+### 22:30 — Provenance, location, and a lived-in market ✅
+
+**Problem surfaced during live test:**
+- A supply message with no Home Node produced `"Snake sweets avail now: +27732252677 (loc unknown). Just updated."` — factually correct, operationally useless. Without a place, a price is noise.
+- The test inventory was a single entry from Mow's own vendor test. Not a market. A judge texting `cheapest cement in Alex?` would get nothing.
+- Naive seeding risks a different kind of lie: if Claude (or a seed script) writes rows under real-looking vendor phone numbers, the DB ceases to be a truthful system of record. The whole "audit log IS the inventory" pitch falls apart the moment a judge opens Table Editor.
+
+**Design decision — sentinel-phone provenance:**
+Every system-contributed reference row uses `vendor_phone = "+27000000000"`. Claude is taught in the system prompt to distinguish:
+- Sentinel phone → "market baseline" / "typical price" (never claim a vendor is selling it)
+- Any other phone → real vendor with geo_tag + freshness + phone surfaced
+
+When both a real vendor and a baseline exist for an item, the vendor wins. A judge opening `inventory_ledger` can see at a glance which rows are demo vs. real by looking at the phone column. Provenance is in the data, not papered over by UI.
+
+**Shipped:**
+- `scripts/seed-ledger.js` — idempotent seeder (wipes all `+27000000000` rows, reinserts) covering 18 township staples: cement (Afrisam + PPC), chicken, bread, vetkoek, mealie meal (Iwisa + Ace), eggs, veg, cooking oil, sugar, paraffin, candles, Sunlight, airtime, mobile data, kombi fare, bakkie fare. Geo_tags mirror how a real vendor describes a spot: `Alex 3rd Ave near Pan Africa mall`, `Khayelitsha Site B main rd`. Timestamps staggered from 15 min to 18h ago so rebuild shows a realistic fresh/aging mix.
+- System prompt `inventoryBlock` expanded with explicit provenance rules. Claude now knows to say "typical price" for baseline entries and surface vendor details for real ones, and never to blend them into a single claim.
+- Route 2 reply hardened — a supply message without a Home Node now returns `"Stock logged but HIDDEN from buyers until you set your area. Reply: home [suburb + street]"` instead of the polite "Tip:" wording. The penalty is explicit: no location, no visibility.
+- Route 2 reply *with* a Home Node now confirms the anchor back to the vendor: `"Stock logged at Alex 3rd Ave. Visible to local buyers for 24h."`
+- Freshness counter cosmetic fix — `"just now"` entries now count as fresh (previously the filter only matched the string `"fresh"`, missing sub-1h entries).
+- `npm run seed` and `npm run stress` convenience scripts added to `package.json`.
+
+**Why this matters for judging:** a judge can text `where can I buy cement near 3rd Ave?` cold and get a real answer with a specific address and an honest timestamp. The DB is browsable — `+27000000000` rows label themselves as demo; any other phone is a real submission. Opus isn't pretending to be a vendor. The restraint is the honesty is the product.
+
+---
+
 *Entries will be added as changes are made. Each entry includes what changed, why, and what it unlocks.*

@@ -1,34 +1,118 @@
 {
   "inventory": [
     {
-      "vendorPhone": "0831112222",
-      "raw_update": "Got 50 bags Afrisam cement, R95 each today",
-      "timestamp": "2026-04-23T08:15:00.000Z",
-      "geo_tag": "Alexandra_3rdAve"
+      "vendorPhone": "+27000000000",
+      "raw_update": "Sunlight soap green bar R15 (baseline)",
+      "timestamp": "2026-04-23T12:09:06.999+00:00",
+      "geo_tag": "Alex 4th Ave"
     },
     {
-      "vendorPhone": "0829998877",
-      "raw_update": "Selling chicken quarter R35, full R120. Peri peri or plain",
-      "timestamp": "2026-04-23T07:30:00.000Z",
-      "geo_tag": "Alexandra_FarRd"
+      "vendorPhone": "+27000000000",
+      "raw_update": "Cooking oil 750ml R45, 2L R110 (baseline)",
+      "timestamp": "2026-04-23T15:09:06.999+00:00",
+      "geo_tag": "Soweto Orlando East"
     },
     {
-      "vendorPhone": "0845556677",
-      "raw_update": "Got maize meal 10kg White Star R89, Iwisa R85",
-      "timestamp": "2026-04-23T09:00:00.000Z",
-      "geo_tag": "Alexandra_LondonRd"
+      "vendorPhone": "+27000000000",
+      "raw_update": "Sugar 2.5kg R55, white or brown (baseline)",
+      "timestamp": "2026-04-23T18:09:06.999+00:00",
+      "geo_tag": "Alex 3rd Ave spaza cluster"
     },
     {
-      "vendorPhone": "0831234567",
-      "raw_update": "Selling airtime Vodacom R5 R10 R29. MTN R12 R29. Data 1GB R99",
-      "timestamp": "2026-04-23T06:45:00.000Z",
-      "geo_tag": "Alexandra_2ndAve"
+      "vendorPhone": "+27000000000",
+      "raw_update": "River sand 1 bakkie load R350 (market baseline)",
+      "timestamp": "2026-04-23T20:09:06.999+00:00",
+      "geo_tag": "Alex Extension 8"
     },
     {
-      "vendorPhone": "0827778899",
-      "raw_update": "Got paraffin 5L R45, 20L R160. Candles 6pack R18",
-      "timestamp": "2026-04-23T08:00:00.000Z",
-      "geo_tag": "Alexandra_8thAve"
+      "vendorPhone": "+27732252677",
+      "raw_update": "Got snake sweets",
+      "timestamp": "2026-04-23T20:24:10.737+00:00",
+      "geo_tag": "unknown"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "Candles pack of 6 R15, loose R3 each (baseline)",
+      "timestamp": "2026-04-23T21:09:06.999+00:00",
+      "geo_tag": "Alex 8th Ave"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "Bakkie Khayelitsha-Cape Town centre R25 (baseline)",
+      "timestamp": "2026-04-23T22:09:06.999+00:00",
+      "geo_tag": "Khayelitsha Site C taxi rank"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "Eggs tray of 30 R80, half tray R42 (baseline)",
+      "timestamp": "2026-04-23T23:09:06.999+00:00",
+      "geo_tag": "Khayelitsha Site C"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "Paraffin 1L R25 for lamps and stoves (baseline)",
+      "timestamp": "2026-04-24T00:09:06.999+00:00",
+      "geo_tag": "Khayelitsha Site B"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "Data 1GB R79 MTN, R85 Vodacom weekly (baseline)",
+      "timestamp": "2026-04-24T01:09:06.999+00:00",
+      "geo_tag": "Alex Pan Africa mall area"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "Iwisa mealie meal 10kg R120, Ace 10kg R115 (baseline)",
+      "timestamp": "2026-04-24T02:09:06.999+00:00",
+      "geo_tag": "Khayelitsha Site B main rd"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "PPC cement 50kg R92 per bag (market baseline)",
+      "timestamp": "2026-04-24T03:09:06.999+00:00",
+      "geo_tag": "Alex London Rd"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "Tomato + onion pack R20, sometimes R25 (baseline)",
+      "timestamp": "2026-04-24T03:39:06.999+00:00",
+      "geo_tag": "Alex 6th Ave veg stalls"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "Fresh white bread R18, brown R17 (baseline)",
+      "timestamp": "2026-04-24T04:39:06.999+00:00",
+      "geo_tag": "Alex 4th Ave spaza row"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "Kombi Alex-Sandton R12, Alex-JHB city R15 (baseline)",
+      "timestamp": "2026-04-24T05:09:06.999+00:00",
+      "geo_tag": "Alex taxi rank"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "Afrisam cement 50kg R95 per bag (market baseline)",
+      "timestamp": "2026-04-24T05:24:06.998+00:00",
+      "geo_tag": "Alex 3rd Ave near Pan Africa mall"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "Chicken quarter R35, half R65, whole R120 (baseline)",
+      "timestamp": "2026-04-24T05:39:06.999+00:00",
+      "geo_tag": "Alex 17th Ave near taxi rank"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "Vetkoek R8 each, with mince R18 (baseline)",
+      "timestamp": "2026-04-24T05:49:06.999+00:00",
+      "geo_tag": "Alex 12th Ave mama shop strip"
+    },
+    {
+      "vendorPhone": "+27000000000",
+      "raw_update": "Airtime: R5 R10 R20 R29 vouchers, all networks (baseline)",
+      "timestamp": "2026-04-24T05:54:06.999+00:00",
+      "geo_tag": "Alex every corner spaza"
     }
   ]
 }

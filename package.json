@@ -7,6 +7,8 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "sandbox": "node sandbox.js",
+    "seed": "node scripts/seed-ledger.js",
+    "stress": "node scripts/stress-test.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["sms", "twilio", "anthropic", "claude", "opus-4.7", "informal-economy", "south-africa"],

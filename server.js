@@ -328,12 +328,15 @@ async function runCompressionRoutine(userQuery, userGeoTag) {
     const hasInventory = liveInventory.length > 0;
 
     if (hasInventory) {
-        console.log(`[📦 INVENTORY] ${liveInventory.length} live items (${liveInventory.filter(i => i.freshness.includes('fresh')).length} fresh)`);
+        const freshCount = liveInventory.filter(i => i.freshness.includes('fresh') || i.freshness === 'just now').length;
+        console.log(`[📦 INVENTORY] ${liveInventory.length} live items (${freshCount} fresh)`);
     }
 
-    // Build dynamic context blocks with freshness metadata
+    // Build dynamic context blocks with freshness metadata.
+    // Entries with vendorPhone === "+27000000000" are MARKET BASELINE (reference pricing,
+    // not a live vendor). Real vendor entries always take priority when both exist.
     const inventoryBlock = hasInventory
-        ? `\n\nLOCAL SUPPLY DATABASE (Live, decay-filtered):\n${JSON.stringify(liveInventory)}\nEach entry has a "freshness" field. Prioritize "fresh" entries. Flag "verify" entries as unconfirmed. Include vendor geo_tag in your response.`
+        ? `\n\nLOCAL SUPPLY DATABASE (Live, decay-filtered):\n${JSON.stringify(liveInventory)}\n\nProvenance rules:\n- If vendorPhone is "+27000000000" → this is MARKET BASELINE, not a live vendor. Say "market baseline" or "typical price" — never claim a vendor is selling it.\n- Otherwise → this is a REAL VENDOR. Surface their phone, geo_tag, and freshness so the buyer can act.\n- When both a real vendor and a baseline exist for the same item, use the vendor entry. Never blend them into one claim.\nEach entry has a "freshness" field. Prioritize "fresh" entries. Flag "verify" entries as unconfirmed.`
         : '';
 
     const locationBlock = userGeoTag
@@ -425,10 +428,11 @@ app.post('/sms', async (req, res) => {
         // is insurance for the next boot.
         logSupplyToLedger(newEntry).catch(err => console.error('[❌ Ledger Write]', err.message));
         console.log(`[💾 SUPPLY LOGGED] ${incomingMessage}`);
-        // If vendor hasn't set their area, nudge them
+        // If vendor hasn't set their area, tell them plainly that the listing is invisible
+        // until they do. The market is locational — without geo, the entry is noise.
         responseText = geoTag
-            ? "Stock logged. You're now visible to local searches today."
-            : "Stock logged! Tip: text 'home [your area]' so buyers can find you nearby.";
+            ? `Stock logged at ${geoTag}. Visible to local buyers for 24h.`
+            : "Stock logged but HIDDEN from buyers until you set your area. Reply: home [suburb + street]";
 
     // ── ROUTE 3: Demand Query (Themba / Gogo) ──
     } else {
@@ -475,7 +479,7 @@ app.post('/sms', async (req, res) => {
 // ──────────────────────────────────────────────
 app.get('/', (req, res) => {
     const liveItems = getLiveInventory();
-    const freshCount = liveItems.filter(i => i.freshness.includes('fresh')).length;
+    const freshCount = liveItems.filter(i => i.freshness.includes('fresh') || i.freshness === 'just now').length;
     const agingCount = liveItems.filter(i => i.freshness.includes('verify')).length;
     res.json({
         status: '🔥 Source-SMS is live',
