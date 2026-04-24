@@ -5,9 +5,19 @@ const twilio = require('twilio');
 const { createClient } = require('@supabase/supabase-js');
 const { Anthropic } = require('@anthropic-ai/sdk');
 const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// Serve the browser-based Nokia 3310 demo at /try and /try.html.
+// This sidesteps Twilio's carrier filters (A2P 10DLC, international inbound)
+// by letting judges POST straight to /sms from a browser with the same
+// Twilio-shape payload. Same backend, same Claude call, same 160-char output.
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/try', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'try.html'));
+});
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });

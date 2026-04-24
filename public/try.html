@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Source — Try it</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: #0f0f10;
+    color: #e8e8e8;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    line-height: 1.5;
+  }
+
+  .intro {
+    max-width: 460px;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .intro h1 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+  }
+  .intro p {
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .intro .tag {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 4px 10px;
+    background: rgba(143, 209, 160, 0.1);
+    border: 1px solid rgba(143, 209, 160, 0.3);
+    border-radius: 100px;
+    color: #8fd1a0;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+  }
+
+  .phone {
+    width: 320px;
+    background: #1c2128;
+    border-radius: 36px;
+    padding: 42px 26px 36px;
+    box-shadow:
+      0 20px 60px rgba(0,0,0,0.6),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    position: relative;
+  }
+  .phone::before {
+    content: "NOKIA";
+    position: absolute;
+    top: 16px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: rgba(255,255,255,0.25);
+    font-size: 9px;
+    letter-spacing: 4px;
+    font-weight: 700;
+  }
+  .phone::after {
+    content: "";
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translate(-50%, 16px);
+    width: 48px;
+    height: 3px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 2px;
+  }
+
+  .screen {
+    background: #9db88a;
+    border-radius: 6px;
+    padding: 10px 12px;
+    height: 220px;
+    margin-bottom: 16px;
+    box-shadow:
+      inset 0 2px 10px rgba(0,0,0,0.25),
+      0 1px 0 rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    font-family: "Courier New", Courier, monospace;
+    color: #1b2a1b;
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 9px;
+    font-weight: 700;
+    border-bottom: 1px dashed rgba(27,42,27,0.3);
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  .status-bar .bars::before { content: "▌▌▌▌"; letter-spacing: -1px; }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 11px;
+    line-height: 1.45;
+    padding-right: 4px;
+  }
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-thumb { background: rgba(27,42,27,0.3); border-radius: 2px; }
+
+  .msg { margin-bottom: 6px; word-wrap: break-word; }
+  .msg.you { text-align: right; font-weight: 600; }
+  .msg.you::before { content: "› "; }
+  .msg.source::before { content: "◂ "; font-weight: 700; }
+  .msg.system { font-style: italic; opacity: 0.7; font-size: 10px; }
+  .msg.thinking { font-style: italic; opacity: 0.7; }
+  .msg.thinking::after {
+    content: "";
+    display: inline-block;
+    animation: dots 1.2s infinite steps(4);
+  }
+  @keyframes dots {
+    0% { content: ""; }
+    25% { content: "."; }
+    50% { content: ".."; }
+    75% { content: "..."; }
+  }
+
+  .composer {
+    display: flex;
+    gap: 8px;
+  }
+  .composer input {
+    flex: 1;
+    background: #9db88a;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12px;
+    color: #1b2a1b;
+    outline: none;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .composer input::placeholder { color: rgba(27,42,27,0.4); }
+  .composer button {
+    background: #0f0f10;
+    color: #9db88a;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 14px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .composer button:hover:not(:disabled) { opacity: 0.8; }
+  .composer button:disabled { opacity: 0.4; cursor: wait; }
+
+  .keypad {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .key {
+    background: #12151a;
+    color: rgba(255,255,255,0.4);
+    border-radius: 6px;
+    padding: 10px 0;
+    text-align: center;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .key small {
+    display: block;
+    font-size: 7px;
+    font-weight: 400;
+    opacity: 0.6;
+    margin-top: 2px;
+  }
+
+  .suggestions {
+    margin-top: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-width: 460px;
+    justify-content: center;
+  }
+  .suggestions button {
+    background: transparent;
+    border: 1px solid #333;
+    color: #aaa;
+    padding: 8px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .suggestions button:hover {
+    border-color: #8fd1a0;
+    color: #8fd1a0;
+  }
+
+  .footer {
+    margin-top: 28px;
+    text-align: center;
+    color: #666;
+    font-size: 12px;
+    max-width: 460px;
+    line-height: 1.6;
+  }
+  .footer code {
+    background: #1c2128;
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: #8fd1a0;
+    font-size: 11px;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .footer a {
+    color: #8fd1a0;
+    text-decoration: none;
+  }
+  .footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+  <div class="intro">
+    <h1>Source</h1>
+    <p>Offline-first market intelligence over SMS for feature-phone users in township economies.</p>
+    <p>Try it as if you were texting from a 3310.</p>
+    <span class="tag">Built with Claude Opus 4.7</span>
+  </div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="status-bar">
+        <span class="bars"></span>
+        <span>Source</span>
+        <span id="char-count">0/160</span>
+      </div>
+      <div class="messages" id="messages">
+        <div class="msg system">Text an item (bread, cement, kombi) or set your area with: home [suburb street]</div>
+      </div>
+    </div>
+
+    <div class="composer">
+      <input id="input" type="text" placeholder="Type a message..." maxlength="160" autocomplete="off" autofocus>
+      <button id="send">SEND</button>
+    </div>
+
+    <div class="keypad" aria-hidden="true">
+      <div class="key">1<small>.,?!</small></div>
+      <div class="key">2<small>abc</small></div>
+      <div class="key">3<small>def</small></div>
+      <div class="key">4<small>ghi</small></div>
+      <div class="key">5<small>jkl</small></div>
+      <div class="key">6<small>mno</small></div>
+      <div class="key">7<small>pqrs</small></div>
+      <div class="key">8<small>tuv</small></div>
+      <div class="key">9<small>wxyz</small></div>
+      <div class="key">*</div>
+      <div class="key">0<small>space</small></div>
+      <div class="key">#</div>
+    </div>
+  </div>
+
+  <div class="suggestions">
+    <button data-q="help">help</button>
+    <button data-q="home Alex 4th Ave Pan Africa mall">home Alex 4th Ave</button>
+    <button data-q="where can i buy cement">where can i buy cement</button>
+    <button data-q="bread price alex">bread price alex</button>
+    <button data-q="kombi alex to jhb">kombi alex to jhb</button>
+    <button data-q="got chicken halves R60 fresh today">got chicken halves R60 fresh today</button>
+  </div>
+
+  <div class="footer">
+    <p>This is a browser simulation — the same backend accepts real SMS at <code>+1 579 589 0008</code> via Twilio webhook.</p>
+    <p>Same payload shape, same Claude call, same 160-char compression.</p>
+  </div>
+
+<script>
+  // Per-session fake ZA number so Home Node state persists within a session
+  // but resets on a fresh visit so judges can see the full flow.
+  let fromNumber = sessionStorage.getItem("srcFrom");
+  if (!fromNumber) {
+    const suffix = String(Math.floor(1000000 + Math.random() * 9000000));
+    fromNumber = "+2782" + suffix;
+    sessionStorage.setItem("srcFrom", fromNumber);
+  }
+
+  const TO_NUMBER = "+15795890008";
+
+  const $messages = document.getElementById("messages");
+  const $input = document.getElementById("input");
+  const $send = document.getElementById("send");
+  const $charCount = document.getElementById("char-count");
+
+  function updateCharCount() {
+    $charCount.textContent = `${$input.value.length}/160`;
+  }
+
+  $input.addEventListener("input", updateCharCount);
+  $input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+  $send.addEventListener("click", sendMessage);
+
+  document.querySelectorAll(".suggestions button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      $input.value = btn.dataset.q;
+      updateCharCount();
+      sendMessage();
+    });
+  });
+
+  function addMessage(text, who) {
+    const div = document.createElement("div");
+    div.className = `msg ${who}`;
+    div.textContent = text;
+    $messages.appendChild(div);
+    $messages.scrollTop = $messages.scrollHeight;
+    return div;
+  }
+
+  async function sendMessage() {
+    const body = $input.value.trim();
+    if (!body) return;
+
+    addMessage(body, "you");
+    $input.value = "";
+    updateCharCount();
+    $send.disabled = true;
+    $input.disabled = true;
+
+    const thinking = addMessage("", "source thinking");
+
+    try {
+      const form = new URLSearchParams();
+      form.append("From", fromNumber);
+      form.append("To", TO_NUMBER);
+      form.append("Body", body);
+
+      const res = await fetch("/sms", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: form.toString(),
+      });
+
+      const xml = await res.text();
+      const match = xml.match(/<Message>([\s\S]*?)<\/Message>/);
+      const reply = match ? match[1].trim() : "(no response)";
+
+      thinking.className = "msg source";
+      thinking.textContent = reply;
+    } catch (err) {
+      thinking.className = "msg source";
+      thinking.textContent = "Error: " + err.message;
+    }
+
+    $send.disabled = false;
+    $input.disabled = false;
+    $input.focus();
+  }
+
+  $input.focus();
+</script>
+</body>
+</html>
