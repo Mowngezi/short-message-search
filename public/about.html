@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Source · Case File</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #f4ede0;
+    --cream-deep: #ebe0cc;
+    --ink: #1a1814;
+    --ink-soft: #463f33;
+    --gold: #b08838;
+    --gold-deep: #8c6a25;
+    --rule: #c9bfa8;
+  }
+
+  html, body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Cormorant Garamond", Georgia, serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    padding: 56px 32px 96px;
+  }
+
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* ─────────── Top strip ─────────── */
+  .top-strip {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 14px;
+    margin-bottom: 56px;
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .top-strip .left {
+    color: var(--gold-deep);
+    font-weight: 600;
+  }
+  .top-strip .right {
+    text-align: right;
+  }
+
+  /* ─────────── Award ribbon ─────────── */
+  .ribbon {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .ribbon-mark {
+    display: inline-block;
+    border: 2px solid var(--gold);
+    color: var(--gold-deep);
+    padding: 12px 26px;
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-weight: 700;
+    line-height: 1.4;
+    position: relative;
+  }
+  .ribbon-mark::before,
+  .ribbon-mark::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 60px;
+    height: 1px;
+    background: var(--gold);
+  }
+  .ribbon-mark::before { left: -76px; }
+  .ribbon-mark::after { right: -76px; }
+  .ribbon-mark span {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    font-weight: 400;
+  }
+
+  /* ─────────── Hero ─────────── */
+  .hero {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+  .hero .eyebrow {
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: clamp(72px, 12vw, 132px);
+    font-weight: 400;
+    letter-spacing: -2px;
+    line-height: 0.92;
+    color: var(--ink);
+    margin-bottom: 18px;
+    font-style: italic;
+  }
+  .hero .tagline {
+    font-size: 22px;
+    font-style: italic;
+    color: var(--ink-soft);
+    max-width: 560px;
+    margin: 0 auto 14px;
+    line-height: 1.4;
+  }
+  .hero .sub {
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-top: 18px;
+  }
+
+  /* ─────────── Credits strip ─────────── */
+  .credits-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 26px 0;
+    margin-bottom: 72px;
+  }
+  .credits-strip .item .label {
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .credits-strip .item .value {
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+
+  /* ─────────── Section title ─────────── */
+  .section-title {
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+  .section-title::before {
+    content: "✦";
+    margin-right: 12px;
+    color: var(--gold);
+  }
+
+  /* ─────────── The case ─────────── */
+  .case {
+    margin-bottom: 72px;
+  }
+  .case h2 {
+    font-size: 44px;
+    font-weight: 400;
+    letter-spacing: -0.6px;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+  .case p {
+    font-size: 19px;
+    line-height: 1.7;
+    color: var(--ink);
+    margin-bottom: 18px;
+    max-width: 720px;
+  }
+  .case p.lede {
+    font-size: 24px;
+    line-height: 1.5;
+    color: var(--ink);
+    border-left: 3px solid var(--gold);
+    padding-left: 22px;
+    font-style: italic;
+    margin-bottom: 28px;
+  }
+
+  /* ─────────── Three columns: personas ─────────── */
+  .three-columns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-bottom: 72px;
+  }
+  .persona .name {
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 12px;
+  }
+  .persona h3 {
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+  .persona p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+  }
+  .persona .stat {
+    border-top: 1px solid var(--rule);
+    padding-top: 14px;
+    margin-top: 14px;
+  }
+  .persona .stat .before,
+  .persona .stat .after {
+    display: block;
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+  }
+  .persona .stat .before {
+    color: var(--ink-soft);
+    text-decoration: line-through;
+    opacity: 0.7;
+    margin-bottom: 4px;
+  }
+  .persona .stat .after {
+    color: var(--gold-deep);
+    font-weight: 700;
+  }
+
+  /* ─────────── Pull quote ─────────── */
+  .pull-quote {
+    border-top: 1px solid var(--gold);
+    border-bottom: 1px solid var(--gold);
+    padding: 56px 0;
+    margin: 72px 0;
+    text-align: center;
+  }
+  .pull-quote blockquote {
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.25;
+    font-style: italic;
+    color: var(--ink);
+    max-width: 720px;
+    margin: 0 auto;
+    letter-spacing: -0.4px;
+  }
+  .pull-quote cite {
+    display: block;
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 26px;
+    font-style: normal;
+  }
+
+  /* ─────────── Mechanism block ─────────── */
+  .mechanism {
+    margin-bottom: 72px;
+  }
+  .mechanism .row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 32px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .mechanism .row:first-child {
+    border-top: 1px solid var(--rule);
+  }
+  .mechanism .row .label {
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    padding-top: 4px;
+  }
+  .mechanism .row .body {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .mechanism .row .body code {
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    background: var(--cream-deep);
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  /* ─────────── Credits block ─────────── */
+  .credits-block {
+    border-top: 2px solid var(--ink);
+    padding-top: 36px;
+    margin-bottom: 60px;
+  }
+  .credits-block h4 {
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 24px;
+    font-weight: 700;
+  }
+  .credits-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px 40px;
+  }
+  .credit-row {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 16px;
+    align-items: baseline;
+    padding-bottom: 12px;
+    border-bottom: 1px dotted var(--rule);
+  }
+  .credit-row .role {
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .credit-row .name {
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  /* ─────────── Footer ─────────── */
+  .footer {
+    text-align: center;
+    border-top: 1px solid var(--rule);
+    padding-top: 26px;
+    font-family: "SF Mono", "Menlo", Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .footer a {
+    color: var(--gold-deep);
+    text-decoration: none;
+    border-bottom: 1px solid var(--gold);
+    padding-bottom: 1px;
+  }
+  .footer a:hover {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+
+  /* ─────────── Mobile ─────────── */
+  @media (max-width: 720px) {
+    body { padding: 36px 22px 64px; }
+    .top-strip { font-size: 9px; letter-spacing: 1.5px; }
+    .ribbon-mark::before, .ribbon-mark::after { display: none; }
+    .credits-strip { grid-template-columns: repeat(2, 1fr); gap: 22px; }
+    .three-columns { grid-template-columns: 1fr; gap: 32px; }
+    .mechanism .row { grid-template-columns: 1fr; gap: 8px; padding: 18px 0; }
+    .credits-grid { grid-template-columns: 1fr; }
+    .credit-row { grid-template-columns: 110px 1fr; }
+    .case h2 { font-size: 32px; }
+    .case p { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Top strip -->
+  <div class="top-strip">
+    <span class="left">Case File №01</span>
+    <span class="right">Submitted · Cerebral Valley · April 2026</span>
+  </div>
+
+  <!-- Award ribbon -->
+  <div class="ribbon">
+    <span class="ribbon-mark">
+      Built with Claude Opus 4.7
+      <span>Hackathon Entry</span>
+    </span>
+  </div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="eyebrow">Source</div>
+    <h1>The market<br>routes itself.</h1>
+    <p class="tagline">An SMS intelligence layer for South Africa's informal economy.</p>
+    <div class="sub">No apps · No data · Just a number</div>
+  </header>
+
+  <!-- Credits strip -->
+  <div class="credits-strip">
+    <div class="item">
+      <span class="label">Category</span>
+      <span class="value">Built with Opus 4.7</span>
+    </div>
+    <div class="item">
+      <span class="label">Market</span>
+      <span class="value">South African townships</span>
+    </div>
+    <div class="item">
+      <span class="label">Channel</span>
+      <span class="value">SMS · 160 characters</span>
+    </div>
+    <div class="item">
+      <span class="label">Status</span>
+      <span class="value">Live, on a real number</span>
+    </div>
+  </div>
+
+  <!-- The case -->
+  <section class="case">
+    <div class="section-title">The Case</div>
+    <h2>Google mapped the internet.<br>The informal economy doesn't live there.</h2>
+    <p class="lede">
+      In South Africa, the feature phone never went away. Roughly five million
+      are sold every year, and millions more are kept as a second phone: the
+      one you take when you don't want to risk the good one. They are not on
+      Maps, not on Yelp, not on Search. The default assumption that a
+      smartphone is the entry ticket to information quietly excludes the
+      parallel device economy that already runs on these phones.
+    </p>
+    <p>
+      Source is the routing layer for the people the internet skipped. A single
+      SMS reaches Claude Opus 4.7, which compresses any answer (clinic hours,
+      cement prices, kombi schedules) into 160 characters and sends it back.
+      No app. No data. No onboarding.
+    </p>
+    <p>
+      The same backend serves both browser simulations and live SMS through a
+      Twilio webhook. There is no mock layer between the demo and the real
+      thing. What you text from your laptop is what Gogo texts from her Nokia.
+    </p>
+  </section>
+
+  <!-- Three personas -->
+  <section>
+    <div class="section-title">The Field</div>
+    <div class="three-columns">
+
+      <div class="persona">
+        <div class="name">Subject 01 · Gogo</div>
+        <h3>Information<br>is dignity.</h3>
+        <p>
+          Walks ninety minutes to find out the clinic ran out of her blood
+          pressure meds. Texts Source instead. Gets opening hours, stock,
+          queue cutoff. Thirty seconds.
+        </p>
+        <div class="stat">
+          <span class="before">90 min walk · risk wasted trip</span>
+          <span class="after">30 sec text · zero airtime</span>
+        </div>
+      </div>
+
+      <div class="persona">
+        <div class="name">Subject 02 · Themba</div>
+        <h3>Bad information<br>costs money.</h3>
+        <p>
+          Hears about a cement price from a friend. Waits thirty minutes for a
+          kombi to chase it. Now he texts first. Real vendor, real price, real
+          distance. The kombi stays parked.
+        </p>
+        <div class="stat">
+          <span class="before">30 min wait · wrong-price ride</span>
+          <span class="after">1 text · vendor confirmed</span>
+        </div>
+      </div>
+
+      <div class="persona">
+        <div class="name">Subject 03 · Thando</div>
+        <h3>A vendor<br>without a window.</h3>
+        <p>
+          Stocks cement two streets over from where Themba is searching.
+          Invisible. Texts "got cement R95 alex 3rd ave". Themba's next query
+          surfaces him. Supply meets demand on the same channel.
+        </p>
+        <div class="stat">
+          <span class="before">Hours of invisible stock</span>
+          <span class="after">1 text · indexed locally</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Pull quote -->
+  <div class="pull-quote">
+    <blockquote>
+      "Source gives Claude access to people<br>even Google can't reach."
+    </blockquote>
+    <cite>· The thesis</cite>
+  </div>
+
+  <!-- Mechanism -->
+  <section class="mechanism">
+    <div class="section-title">The Mechanism</div>
+
+    <div class="row">
+      <div class="label">Channel</div>
+      <div class="body">
+        Twilio SMS webhook. Inbound messages arrive at <code>POST /sms</code>
+        as <code>application/x-www-form-urlencoded</code>, exactly as a
+        production telco delivery would.
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="label">Engine</div>
+      <div class="body">
+        Claude Opus 4.7 with adaptive extended thinking. The model reasons
+        internally about constraint, context, and compression before producing
+        a 160-character output. No post-processing truncation.
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="label">Memory</div>
+      <div class="body">
+        Supabase ledger persists supply entries and home-node geo tags. On
+        boot, the server rehydrates inventory from the last 24 hours so a
+        container restart never loses the market.
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="label">Languages</div>
+      <div class="body">
+        All eleven official South African languages, plus township slang and
+        natural code-switching. The model responds in whatever language the
+        user texts in.
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="label">Decay</div>
+      <div class="body">
+        Stock entries expire after 24 hours. Fresh entries (under six hours)
+        are prioritized; older entries are flagged for verification. The
+        market cleans itself.
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Pull quote 2 -->
+  <div class="pull-quote">
+    <blockquote>
+      "This isn't search.<br>It's the market routing itself, over a number."
+    </blockquote>
+    <cite>· The closer</cite>
+  </div>
+
+  <!-- Credits -->
+  <section class="credits-block">
+    <h4>Credits</h4>
+    <div class="credits-grid">
+      <div class="credit-row">
+        <span class="role">Built by</span>
+        <span class="name">Mow · Simulacra</span>
+      </div>
+      <div class="credit-row">
+        <span class="role">Engine</span>
+        <span class="name">Claude Opus 4.7</span>
+      </div>
+      <div class="credit-row">
+        <span class="role">Channel</span>
+        <span class="name">Twilio Programmable SMS</span>
+      </div>
+      <div class="credit-row">
+        <span class="role">Persistence</span>
+        <span class="name">Supabase</span>
+      </div>
+      <div class="credit-row">
+        <span class="role">Runtime</span>
+        <span class="name">Node.js · Express · Railway</span>
+      </div>
+      <div class="credit-row">
+        <span class="role">Submitted to</span>
+        <span class="name">Cerebral Valley · Built with Opus 4.7</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <a href="/try">Try the simulation</a>
+    &nbsp;·&nbsp;
+    +1 579 589 0008
+    &nbsp;·&nbsp;
+    Source · 2026
+  </footer>
+
+</div>
+
+</body>
+</html>
