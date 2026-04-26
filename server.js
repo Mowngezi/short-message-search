@@ -18,6 +18,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/try', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'try.html'));
 });
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'about.html'));
+});
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -58,11 +61,19 @@ function writeInventory(data) {
 }
 
 // ──────────────────────────────────────────────
-// HOME NODE — Semantic GPS via Supabase
+// HOME NODE — Semantic GPS, cache-first with Supabase fallback
+// In-memory map is authoritative for the live session. Supabase
+// is best-effort persistence: if the upsert fails (missing unique
+// constraint, RLS, etc.) the demo never breaks.
 // ──────────────────────────────────────────────
+const homeCache = new Map(); // phone_number → geo_tag
 
 // Look up a user's saved location (their "Home Node")
 async function getUserProfile(phoneNumber) {
+    // Cache hit is authoritative
+    const cached = homeCache.get(phoneNumber);
+    if (cached) return { geo_tag: cached };
+
     try {
         const { data, error } = await supabase
             .from('user_profiles')
@@ -71,6 +82,8 @@ async function getUserProfile(phoneNumber) {
             .single();
 
         if (error || !data) return null;
+        // Populate cache from DB so subsequent reads are instant
+        homeCache.set(phoneNumber, data.geo_tag);
         return data;
     } catch {
         return null;
@@ -79,23 +92,30 @@ async function getUserProfile(phoneNumber) {
 
 // Save a user's Home Node location
 async function saveUserHome(phoneNumber, locationText) {
+    const cleaned = locationText.trim();
+
+    // Cache write is the contract. Always succeeds.
+    homeCache.set(phoneNumber, cleaned);
+    console.log(`[🏠 HOME NODE SET] ${phoneNumber} → "${cleaned}"`);
+
+    // Best-effort Supabase persistence. We declare onConflict so the upsert
+    // works even if the PK is composite or named differently. Failures are
+    // logged but never block the user.
     try {
         const { error } = await supabase
             .from('user_profiles')
-            .upsert({
-                phone_number: phoneNumber,
-                geo_tag: locationText.trim()
-            });
-
+            .upsert(
+                { phone_number: phoneNumber, geo_tag: cleaned },
+                { onConflict: 'phone_number' }
+            );
         if (error) {
-            console.error('[❌ Home Node Error]', error.message);
-            return false;
+            console.error('[⚠️ Home Node Supabase]', error.message, '· cache holds');
         }
-        console.log(`[🏠 HOME NODE SET] ${phoneNumber} → "${locationText.trim()}"`);
-        return true;
-    } catch {
-        return false;
+    } catch (err) {
+        console.error('[⚠️ Home Node Exception]', err.message, '· cache holds');
     }
+
+    return true;
 }
 
 // Detect if a message is a "set home" command
